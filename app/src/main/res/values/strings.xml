@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ClosedPull</string>
+    <string name="creation_date">Creation date: %1$s</string>
+    <string name="closed_date">Closed date: %1$s</string>
 </resources>
