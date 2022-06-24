@@ -16,9 +16,9 @@ class ClosedPrViewHolder(private val itemView: View): RecyclerView.ViewHolder(it
     private val closedDate = itemView.findViewById<TextView>(R.id.closedDate)
 
     fun bind(item: ClosedPrUiModel) {
-        userName.text = item.username
+        userName.text = itemView.context.getString(R.string.username).format(item.username)
         title.text = item.title
         creationDate.text = itemView.context.getString(R.string.creation_date).format(item.creationDate)
-        closedDate.text = itemView.context.getString(R.string.creation_date).format(item.closedDate)
+        closedDate.text = itemView.context.getString(R.string.closed_date).format(item.closedDate)
     }
 }

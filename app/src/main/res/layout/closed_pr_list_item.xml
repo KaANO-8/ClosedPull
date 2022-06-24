@@ -30,6 +30,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="@+id/userImageView"
             app:layout_constraintTop_toBottomOf="@id/userImageView"
+            style="@style/TextAppearance.AppCompat.Caption"
             tools:text="userName" />
 
         <TextView
@@ -40,6 +41,7 @@
             android:layout_marginEnd="@dimen/margin_8dp"
             app:layout_constraintLeft_toRightOf="@+id/userImageView"
             app:layout_constraintTop_toTopOf="parent"
+            style="@style/TextAppearance.AppCompat.Title"
             tools:text="title" />
 
         <TextView
@@ -51,6 +53,7 @@
             android:layout_marginTop="@dimen/margin_8dp"
             app:layout_constraintLeft_toRightOf="@+id/userImageView"
             app:layout_constraintTop_toBottomOf="@id/titleTextView"
+            style="@style/TextAppearance.AppCompat.Body1"
             tools:text="creationDate" />
 
         <TextView
@@ -60,6 +63,7 @@
             android:layout_marginTop="@dimen/margin_8dp"
             android:layout_marginStart="@dimen/margin_24dp"
             android:layout_marginEnd="@dimen/margin_8dp"
+            style="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintLeft_toRightOf="@+id/userImageView"
             app:layout_constraintTop_toBottomOf="@+id/creationDate"
             tools:text="closedDate" />
