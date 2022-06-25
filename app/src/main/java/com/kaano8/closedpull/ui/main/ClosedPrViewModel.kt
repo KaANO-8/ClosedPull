@@ -22,7 +22,10 @@ class ClosedPrViewModel @Inject constructor(private val repository: ClosedPrRepo
             _uiState.value = UiState.Loading
             try {
                 val response = repository.getClosedPrs()
-                _uiState.value = UiState.Success(closedPrList = response.map { it.mapToUiModel() })
+                _uiState.value = if (response.isEmpty())
+                    UiState.NoClosedPrs
+                else
+                    UiState.Success(closedPrList = response.map { it.mapToUiModel() })
             } catch (exception: HttpException) {
                 _uiState.value = UiState.Error("HTTP exception: ${exception.message}")
             } catch (exception: Exception) {
