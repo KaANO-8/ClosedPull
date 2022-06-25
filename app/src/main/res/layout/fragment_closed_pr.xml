@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.ClosedPrFragment">
 
+    <TextView
+        android:id="@+id/noClosedPrs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        style="@style/TextAppearance.AppCompat.Headline"
+        tools:text="No closed prs!"
+        android:text="@string/no_closed_prs"
+        android:visibility="gone"/>
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

@@ -3,4 +3,5 @@
     <string name="username">\@%1$s</string>
     <string name="creation_date">Creation date: %1$s</string>
     <string name="closed_date">Closed date: %1$s</string>
+    <string name="no_closed_prs">No closed prs!</string>
 </resources>

@@ -54,37 +54,54 @@ class ClosedPrFragment : Fragment() {
     private fun observeForEvents() {
         viewModel.uiState.observe(viewLifecycleOwner) { uiStatus ->
             when (uiStatus) {
+                is UiState.NoClosedPrs -> {
+                    closedPrBinding.apply {
+                        setSwipeRefreshingFalse()
+                        progressBar.gone()
+                        noClosedPrs.visible()
+                        closedPrRecyclerView.gone()
+                    }
+                }
                 is UiState.Loading -> {
                     closedPrBinding.apply {
                         if (!swipeRefreshLayout.isRefreshing)
                             progressBar.visible()
                         closedPrRecyclerView.gone()
+                        noClosedPrs.gone()
                     }
                 }
                 is UiState.Success -> {
                     adapter.submitList(uiStatus.closedPrList)
                     closedPrBinding.apply {
-                        if (swipeRefreshLayout.isRefreshing)
-                            swipeRefreshLayout.isRefreshing = false
+                        setSwipeRefreshingFalse()
                         progressBar.gone()
-                        swipeRefreshLayout.visible()
                         closedPrRecyclerView.visible()
+                        noClosedPrs.gone()
                     }
                 }
                 is UiState.Error -> {
                     closedPrBinding.apply {
-                        if (swipeRefreshLayout.isRefreshing)
-                            swipeRefreshLayout.isRefreshing = false
+                        setSwipeRefreshingFalse()
                         progressBar.gone()
-                        swipeRefreshLayout.gone()
+                        closedPrRecyclerView.gone()
+                        noClosedPrs.gone()
                     }
                     Toast.makeText(
                         context,
-                        "Api Error: ${uiStatus.exceptionMessage}",
+                        uiStatus.exceptionMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             }
         }
+    }
+
+    private fun setSwipeRefreshingFalse() {
+        with(closedPrBinding.swipeRefreshLayout) {
+            if (isRefreshing)
+                isRefreshing = false
+        }
+
+
     }
 }
