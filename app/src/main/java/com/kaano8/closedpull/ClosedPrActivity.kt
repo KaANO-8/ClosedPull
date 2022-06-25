@@ -2,6 +2,7 @@ package com.kaano8.closedpull
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.kaano8.closedpull.R
 import com.kaano8.closedpull.ui.main.ClosedPrFragment
 import dagger.hilt.android.AndroidEntryPoint
 

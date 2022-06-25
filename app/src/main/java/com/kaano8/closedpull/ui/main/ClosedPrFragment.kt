@@ -11,7 +11,7 @@ import com.kaano8.closedpull.databinding.FragmentClosedPrBinding
 import com.kaano8.closedpull.extensions.gone
 import com.kaano8.closedpull.extensions.visible
 import com.kaano8.closedpull.ui.main.adapter.ClosedPrListAdapter
-import com.kaano8.closedpull.ui.main.state.UiStatus
+import com.kaano8.closedpull.ui.main.state.UiState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -41,26 +41,27 @@ class ClosedPrFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeForEvents()
+        viewModel.getClosedPrs()
     }
 
     private fun setupRecyclerView() {
         closedPrBinding.swipeRefreshLayout.setOnRefreshListener {
-            observeForEvents()
+            viewModel.getClosedPrs()
         }
         closedPrBinding.closedPrRecyclerView.adapter = adapter
     }
 
     private fun observeForEvents() {
-        viewModel.getClosedPrs().observe(viewLifecycleOwner) { uiStatus ->
+        viewModel.uiState.observe(viewLifecycleOwner) { uiStatus ->
             when (uiStatus) {
-                is UiStatus.Loading -> {
+                is UiState.Loading -> {
                     closedPrBinding.apply {
                         if (!swipeRefreshLayout.isRefreshing)
                             progressBar.visible()
                         closedPrRecyclerView.gone()
                     }
                 }
-                is UiStatus.Success -> {
+                is UiState.Success -> {
                     adapter.submitList(uiStatus.closedPrList)
                     closedPrBinding.apply {
                         if (swipeRefreshLayout.isRefreshing)
@@ -70,7 +71,7 @@ class ClosedPrFragment : Fragment() {
                         closedPrRecyclerView.visible()
                     }
                 }
-                is UiStatus.Error -> {
+                is UiState.Error -> {
                     closedPrBinding.apply {
                         if (swipeRefreshLayout.isRefreshing)
                             swipeRefreshLayout.isRefreshing = false

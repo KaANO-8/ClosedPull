@@ -1,26 +1,33 @@
 package com.kaano8.closedpull.ui.main
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.kaano8.closedpull.extensions.mapToUiModel
 import com.kaano8.closedpull.repository.ClosedPrRepository
-import com.kaano8.closedpull.ui.main.state.UiStatus
+import com.kaano8.closedpull.ui.main.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
 class ClosedPrViewModel @Inject constructor(private val repository: ClosedPrRepository) :
     ViewModel() {
 
-    fun getClosedPrs() = liveData(Dispatchers.IO) {
-        emit(UiStatus.Loading)
-        try {
-            val response = repository.getClosedPrs()
-            emit(UiStatus.Success(closedPrList = response.map { it.mapToUiModel() }))
+    private val _uiState: MutableLiveData<UiState> = MutableLiveData()
+    val uiState: LiveData<UiState>
+        get() = _uiState
 
-        } catch (exception: Exception) {
-            emit(UiStatus.Error(exception.localizedMessage ?: "Generic error"))
+    fun getClosedPrs() {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val response = repository.getClosedPrs()
+                _uiState.value = UiState.Success(closedPrList = response.map { it.mapToUiModel() })
+            } catch (exception: HttpException) {
+                _uiState.value = UiState.Error("HTTP exception: ${exception.message}")
+            } catch (exception: Exception) {
+                _uiState.value = UiState.Error("Generic exception: ${exception.message}")
+            }
         }
     }
 }
