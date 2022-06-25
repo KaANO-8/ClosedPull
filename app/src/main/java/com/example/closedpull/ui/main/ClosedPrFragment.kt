@@ -44,6 +44,9 @@ class ClosedPrFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        closedPrBinding.swipeRefreshLayout.setOnRefreshListener {
+            observeForEvents()
+        }
         closedPrBinding.closedPrRecyclerView.adapter = adapter
     }
 
@@ -52,21 +55,27 @@ class ClosedPrFragment : Fragment() {
             when (uiStatus) {
                 is UiStatus.Loading -> {
                     closedPrBinding.apply {
-                        progressBar.visible()
+                        if (!swipeRefreshLayout.isRefreshing)
+                            progressBar.visible()
                         closedPrRecyclerView.gone()
                     }
                 }
                 is UiStatus.Success -> {
                     adapter.submitList(uiStatus.closedPrList)
                     closedPrBinding.apply {
+                        if (swipeRefreshLayout.isRefreshing)
+                            swipeRefreshLayout.isRefreshing = false
                         progressBar.gone()
+                        swipeRefreshLayout.visible()
                         closedPrRecyclerView.visible()
                     }
                 }
                 is UiStatus.Error -> {
                     closedPrBinding.apply {
+                        if (swipeRefreshLayout.isRefreshing)
+                            swipeRefreshLayout.isRefreshing = false
                         progressBar.gone()
-                        closedPrRecyclerView.gone()
+                        swipeRefreshLayout.gone()
                     }
                     Toast.makeText(
                         context,
