@@ -1,7 +1,7 @@
 package com.example.closedpull.repository
 
-import com.example.closedpull.ui.main.adapter.data.ClosedPrUiModel
+import com.example.closedpull.data.ClosedPrDataModel
 
 interface ClosedPrRepository {
-    fun getClosedPrs(): List<ClosedPrUiModel>
+    suspend fun getClosedPrs(): List<ClosedPrDataModel>
 }

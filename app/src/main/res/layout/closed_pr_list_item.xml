@@ -42,7 +42,9 @@
             app:layout_constraintLeft_toRightOf="@+id/userImageView"
             app:layout_constraintTop_toTopOf="parent"
             style="@style/TextAppearance.AppCompat.Title"
-            tools:text="title" />
+            android:autoSizeTextType="uniform"
+            tools:text="title"
+            />
 
         <TextView
             android:id="@+id/creationDate"
