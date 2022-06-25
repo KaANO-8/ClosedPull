@@ -101,7 +101,5 @@ class ClosedPrFragment : Fragment() {
             if (isRefreshing)
                 isRefreshing = false
         }
-
-
     }
 }
