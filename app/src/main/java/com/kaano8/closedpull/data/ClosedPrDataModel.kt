@@ -20,5 +20,3 @@ data class User(
     val login: String
 )
 
-const val USERNAME = "KaANO-8"
-const val REPO_NAME = "ClosedPull"

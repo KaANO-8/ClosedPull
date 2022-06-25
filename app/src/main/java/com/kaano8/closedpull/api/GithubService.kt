@@ -13,6 +13,5 @@ interface GithubService {
         @Path("owner") owner: String,
         @Path("repoName") repoName: String,
         @Query("state") state: String = "closed"
-        //@Query("page") nextPageNumber: Int
     ): List<ClosedPrDataModel>
 }
