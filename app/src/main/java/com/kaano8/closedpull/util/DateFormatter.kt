@@ -1,11 +1,9 @@
 package com.kaano8.closedpull.util
 
-import android.util.Log
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
 object DateFormatter {
-    private const val TAG = "DateFormatter"
 
     fun formatDate(
         inputDate: String,
@@ -17,7 +15,7 @@ object DateFormatter {
             val date = inputFormatter.parse(inputDate.dropLast(1))
             return SimpleDateFormat(outputFormat).format(date)
         } catch (exception: ParseException) {
-            Log.d(TAG, "${exception.message}")
+            println(exception.message)
         }
         return inputDate
     }
