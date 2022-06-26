@@ -7,12 +7,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import com.kaano8.closedpull.databinding.FragmentClosedPrBinding
 import com.kaano8.closedpull.extensions.gone
 import com.kaano8.closedpull.extensions.visible
 import com.kaano8.closedpull.ui.main.adapter.ClosedPrListAdapter
-import com.kaano8.closedpull.ui.main.state.UiState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -41,65 +44,46 @@ class ClosedPrFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeForEvents()
-        viewModel.getClosedPrs()
     }
 
     private fun setupRecyclerView() {
-        closedPrBinding.swipeRefreshLayout.setOnRefreshListener {
-            viewModel.getClosedPrs()
+        with(closedPrBinding) {
+            swipeRefreshLayout.setOnRefreshListener { adapter.refresh() }
+
+            closedPrRecyclerView.adapter = adapter
+
+            adapter.addLoadStateListener { loadState ->
+
+                if (loadState.refresh is LoadState.Loading) {
+                    if (!swipeRefreshLayout.isRefreshing)
+                        progressBar.visible()
+                } else {
+                    if (swipeRefreshLayout.isRefreshing)
+                        swipeRefreshLayout.isRefreshing = false
+                    progressBar.gone()
+                }
+
+                // getting the error
+                val error = when {
+                    loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+                    loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+                    loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+                    else -> null
+                }
+                error?.let {
+                    Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
+                }
+
+            }
         }
-        closedPrBinding.closedPrRecyclerView.adapter = adapter
+
     }
 
     private fun observeForEvents() {
-        viewModel.uiState.observe(viewLifecycleOwner) { uiStatus ->
-            when (uiStatus) {
-                is UiState.NoClosedPrs -> {
-                    closedPrBinding.apply {
-                        setSwipeRefreshingFalse()
-                        progressBar.gone()
-                        noClosedPrs.visible()
-                        closedPrRecyclerView.gone()
-                    }
-                }
-                is UiState.Loading -> {
-                    closedPrBinding.apply {
-                        if (!swipeRefreshLayout.isRefreshing)
-                            progressBar.visible()
-                        closedPrRecyclerView.gone()
-                        noClosedPrs.gone()
-                    }
-                }
-                is UiState.Success -> {
-                    adapter.submitList(uiStatus.closedPrList)
-                    closedPrBinding.apply {
-                        setSwipeRefreshingFalse()
-                        progressBar.gone()
-                        closedPrRecyclerView.visible()
-                        noClosedPrs.gone()
-                    }
-                }
-                is UiState.Error -> {
-                    closedPrBinding.apply {
-                        setSwipeRefreshingFalse()
-                        progressBar.gone()
-                        closedPrRecyclerView.gone()
-                        noClosedPrs.gone()
-                    }
-                    Toast.makeText(
-                        context,
-                        uiStatus.exceptionMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.flow.collectLatest { pagingData ->
+                adapter.submitData(pagingData)
             }
-        }
-    }
-
-    private fun setSwipeRefreshingFalse() {
-        with(closedPrBinding.swipeRefreshLayout) {
-            if (isRefreshing)
-                isRefreshing = false
         }
     }
 }

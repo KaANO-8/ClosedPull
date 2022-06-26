@@ -2,6 +2,7 @@ package com.kaano8.closedpull.ui.main.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.kaano8.closedpull.R
@@ -9,7 +10,7 @@ import com.kaano8.closedpull.ui.main.adapter.data.ClosedPrUiModel
 import javax.inject.Inject
 
 class ClosedPrListAdapter @Inject constructor() :
-    ListAdapter<ClosedPrUiModel, ClosedPrViewHolder>(MainDiffCallback()) {
+    PagingDataAdapter<ClosedPrUiModel, ClosedPrViewHolder>(MainDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClosedPrViewHolder {
         val viewBinding =
@@ -18,7 +19,8 @@ class ClosedPrListAdapter @Inject constructor() :
     }
 
     override fun onBindViewHolder(holder: ClosedPrViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val item = getItem(position)
+        item?.let { holder.bind(it) }
     }
 
     /**

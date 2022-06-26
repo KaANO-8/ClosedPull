@@ -1,6 +1,5 @@
 package com.kaano8.closedpull
 
-import com.kaano8.closedpull.repository.ClosedPrRepository
 import org.junit.Before
 import org.mockito.Mock
 
