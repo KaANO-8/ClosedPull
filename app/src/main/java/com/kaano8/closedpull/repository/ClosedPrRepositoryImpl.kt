@@ -3,7 +3,7 @@ package com.kaano8.closedpull.repository
 import com.kaano8.closedpull.api.Constants.REPO_NAME
 import com.kaano8.closedpull.api.Constants.USERNAME
 import com.kaano8.closedpull.api.GithubService
-import com.kaano8.closedpull.data.ClosedPrDataModel
+import com.kaano8.closedpull.api.data.ClosedPrDataModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

@@ -1,8 +1,11 @@
-package com.kaano8.closedpull.data
+package com.kaano8.closedpull.api.data
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
+/**
+ * @Keep will help preserve data models once proguard is enabled.
+ */
 @Keep
 data class ClosedPrDataModel(
     val id: Int,
@@ -13,6 +16,9 @@ data class ClosedPrDataModel(
     @SerializedName("closed_at") val closedAt: String
 )
 
+/**
+ * @Keep will help preserve data models once proguard is enabled.
+ */
 @Keep
 data class User(
     @SerializedName("avatar_url") val avatarUrl: String,

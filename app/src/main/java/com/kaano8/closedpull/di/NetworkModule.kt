@@ -1,5 +1,6 @@
 package com.kaano8.closedpull.di
 
+import com.kaano8.closedpull.BuildConfig
 import com.kaano8.closedpull.api.GithubService
 import dagger.Module
 import dagger.Provides
@@ -16,7 +17,11 @@ class NetworkModule {
 
     @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor().also { it.level = HttpLoggingInterceptor.Level.BODY }
+        return HttpLoggingInterceptor().also {
+            // Add logging interceptor for only debug builds
+            if (BuildConfig.DEBUG)
+                it.level = HttpLoggingInterceptor.Level.BODY
+        }
     }
 
     @Provides

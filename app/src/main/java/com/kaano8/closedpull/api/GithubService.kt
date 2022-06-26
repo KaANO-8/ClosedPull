@@ -1,6 +1,6 @@
 package com.kaano8.closedpull.api
 
-import com.kaano8.closedpull.data.ClosedPrDataModel
+import com.kaano8.closedpull.api.data.ClosedPrDataModel
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
