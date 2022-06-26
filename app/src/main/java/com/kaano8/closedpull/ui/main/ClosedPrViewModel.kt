@@ -1,6 +1,10 @@
 package com.kaano8.closedpull.ui.main
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.kaano8.closedpull.api.data.ClosedPrException
 import com.kaano8.closedpull.extensions.mapToUiModel
 import com.kaano8.closedpull.repository.ClosedPrRepository
 import com.kaano8.closedpull.ui.main.state.UiState
@@ -27,10 +31,8 @@ class ClosedPrViewModel @Inject constructor(private val repository: ClosedPrRepo
                     UiState.NoClosedPrs
                 else
                     UiState.Success(closedPrList = response.map { it.mapToUiModel() })
-            } catch (exception: HttpException) {
-                _uiState.value = UiState.Error("HTTP exception: ${exception.localizedMessage}")
-            } catch (exception: IOException) {
-                _uiState.value = UiState.Error("Generic exception: ${exception.localizedMessage}")
+            } catch (exception: ClosedPrException) {
+                _uiState.value = UiState.Error(exception.displayMessage)
             }
         }
     }
