@@ -9,10 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
+import androidx.paging.LoadStateAdapter
 import com.kaano8.closedpull.databinding.FragmentClosedPrBinding
 import com.kaano8.closedpull.extensions.gone
 import com.kaano8.closedpull.extensions.visible
 import com.kaano8.closedpull.ui.main.adapter.ClosedPrListAdapter
+import com.kaano8.closedpull.ui.main.adapter.ClosedPrStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -30,7 +32,10 @@ class ClosedPrFragment : Fragment() {
     private val viewModel: ClosedPrViewModel by viewModels()
 
     @Inject
-    lateinit var adapter: ClosedPrListAdapter
+    lateinit var closedPrListAdapter: ClosedPrListAdapter
+
+    @Inject
+    lateinit var closedPrStateAdapter: ClosedPrStateAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,11 +53,21 @@ class ClosedPrFragment : Fragment() {
 
     private fun setupRecyclerView() {
         with(closedPrBinding) {
-            swipeRefreshLayout.setOnRefreshListener { adapter.refresh() }
+            swipeRefreshLayout.setOnRefreshListener { closedPrListAdapter.refresh() }
 
-            closedPrRecyclerView.adapter = adapter
+            closedPrStateAdapter.setRetryAction { closedPrListAdapter.retry() }
 
-            adapter.addLoadStateListener { loadState ->
+            closedPrListAdapter.withLoadStateFooter(
+                footer = closedPrStateAdapter
+            )
+
+            closedPrRecyclerView.apply {
+                adapter = closedPrListAdapter
+                // Optimization param stating that size of item will remain same throughout
+                setHasFixedSize(true)
+            }
+
+/*            closedPrListAdapter.addLoadStateListener { loadState ->
 
                 if (loadState.refresh is LoadState.Loading) {
                     if (!swipeRefreshLayout.isRefreshing)
@@ -74,7 +89,7 @@ class ClosedPrFragment : Fragment() {
                     Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
                 }
 
-            }
+            }*/
         }
 
     }
@@ -82,7 +97,7 @@ class ClosedPrFragment : Fragment() {
     private fun observeForEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collectLatest { pagingData ->
-                adapter.submitData(pagingData)
+                closedPrListAdapter.submitData(pagingData)
             }
         }
     }
