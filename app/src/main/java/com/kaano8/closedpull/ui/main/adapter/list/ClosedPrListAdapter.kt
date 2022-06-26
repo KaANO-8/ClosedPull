@@ -1,10 +1,9 @@
-package com.kaano8.closedpull.ui.main.adapter
+package com.kaano8.closedpull.ui.main.adapter.list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import com.kaano8.closedpull.R
 import com.kaano8.closedpull.ui.main.adapter.data.ClosedPrUiModel
 import javax.inject.Inject

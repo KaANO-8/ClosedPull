@@ -1,4 +1,4 @@
-package com.kaano8.closedpull.ui.main.adapter
+package com.kaano8.closedpull.ui.main.adapter.list
 
 import android.view.View
 import android.widget.ImageView

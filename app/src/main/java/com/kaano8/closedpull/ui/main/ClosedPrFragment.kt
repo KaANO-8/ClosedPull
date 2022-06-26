@@ -9,12 +9,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
-import androidx.paging.LoadStateAdapter
 import com.kaano8.closedpull.databinding.FragmentClosedPrBinding
 import com.kaano8.closedpull.extensions.gone
 import com.kaano8.closedpull.extensions.visible
-import com.kaano8.closedpull.ui.main.adapter.ClosedPrListAdapter
-import com.kaano8.closedpull.ui.main.adapter.ClosedPrStateAdapter
+import com.kaano8.closedpull.ui.main.adapter.list.ClosedPrListAdapter
+import com.kaano8.closedpull.ui.main.adapter.loadstate.ClosedPrStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -34,9 +33,6 @@ class ClosedPrFragment : Fragment() {
     @Inject
     lateinit var closedPrListAdapter: ClosedPrListAdapter
 
-    @Inject
-    lateinit var closedPrStateAdapter: ClosedPrStateAdapter
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,18 +44,13 @@ class ClosedPrFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        observeForEvents()
+        startCollection()
+        observeLoadStates()
     }
 
     private fun setupRecyclerView() {
         with(closedPrBinding) {
             swipeRefreshLayout.setOnRefreshListener { closedPrListAdapter.refresh() }
-
-            closedPrStateAdapter.setRetryAction { closedPrListAdapter.retry() }
-
-            closedPrListAdapter.withLoadStateFooter(
-                footer = closedPrStateAdapter
-            )
 
             closedPrRecyclerView.apply {
                 adapter = closedPrListAdapter
@@ -67,38 +58,46 @@ class ClosedPrFragment : Fragment() {
                 setHasFixedSize(true)
             }
 
-/*            closedPrListAdapter.addLoadStateListener { loadState ->
-
-                if (loadState.refresh is LoadState.Loading) {
-                    if (!swipeRefreshLayout.isRefreshing)
-                        progressBar.visible()
-                } else {
-                    if (swipeRefreshLayout.isRefreshing)
-                        swipeRefreshLayout.isRefreshing = false
-                    progressBar.gone()
-                }
-
-                // getting the error
-                val error = when {
-                    loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
-                    loadState.append is LoadState.Error -> loadState.append as LoadState.Error
-                    loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
-                    else -> null
-                }
-                error?.let {
-                    Toast.makeText(context, it.error.message, Toast.LENGTH_LONG).show()
-                }
-
-            }*/
+            closedPrListAdapter.withLoadStateHeaderAndFooter(
+                header = ClosedPrStateAdapter(closedPrListAdapter::retry),
+                footer = ClosedPrStateAdapter(closedPrListAdapter::retry)
+            )
         }
-
     }
 
-    private fun observeForEvents() {
+    private fun startCollection() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collectLatest { pagingData ->
                 closedPrListAdapter.submitData(pagingData)
             }
         }
+    }
+
+    private fun observeLoadStates() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            closedPrListAdapter.loadStateFlow.collectLatest { loadStates ->
+                // Need to identify the initial state, otherwise it will be shown at 2 places
+                when(loadStates.source.refresh) {
+                    is LoadState.NotLoading -> {
+                       hideProgress()
+                    }
+                    is LoadState.Loading -> {
+                        if (!closedPrBinding.swipeRefreshLayout.isRefreshing)
+                            closedPrBinding.progressBar.visible()
+                    }
+                    is LoadState.Error -> {
+                        hideProgress()
+                        Toast.makeText(context, (loadStates.source.refresh as? LoadState.Error)?.error?.message ?: "", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun hideProgress() {
+        if (closedPrBinding.swipeRefreshLayout.isRefreshing)
+            closedPrBinding.swipeRefreshLayout.isRefreshing = false
+        else
+            closedPrBinding.progressBar.gone()
     }
 }
