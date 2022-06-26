@@ -12,9 +12,7 @@ class ClosedPrListAdapter @Inject constructor() :
     PagingDataAdapter<ClosedPrUiModel, ClosedPrViewHolder>(MainDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClosedPrViewHolder {
-        val viewBinding =
-            LayoutInflater.from(parent.context).inflate(R.layout.closed_pr_list_item, parent, false)
-        return ClosedPrViewHolder(viewBinding)
+        return ClosedPrViewHolder.create(parent)
     }
 
     override fun onBindViewHolder(holder: ClosedPrViewHolder, position: Int) {
