@@ -1,20 +1,23 @@
-package com.kaano8.closedpull.ui.main.adapter
+package com.kaano8.closedpull.ui.main.adapter.list
 
+import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
+import com.kaano8.closedpull.R
 import com.kaano8.closedpull.ui.main.adapter.data.ClosedPrUiModel
 import javax.inject.Inject
 
 class ClosedPrListAdapter @Inject constructor() :
-    ListAdapter<ClosedPrUiModel, ClosedPrViewHolder>(MainDiffCallback()) {
+    PagingDataAdapter<ClosedPrUiModel, ClosedPrViewHolder>(MainDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClosedPrViewHolder {
         return ClosedPrViewHolder.create(parent)
     }
 
     override fun onBindViewHolder(holder: ClosedPrViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val item = getItem(position)
+        item?.let { holder.bind(it) }
     }
 
     /**

@@ -12,6 +12,7 @@ interface GithubService {
     suspend fun getClosedPrs(
         @Path("owner") owner: String,
         @Path("repoName") repoName: String,
-        @Query("state") state: String = "closed"
+        @Query("state") state: String = "closed",
+        @Query("page") page: Int
     ): List<ClosedPrDataModel>
 }

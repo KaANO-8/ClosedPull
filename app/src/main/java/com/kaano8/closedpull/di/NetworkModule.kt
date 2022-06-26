@@ -19,17 +19,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 class NetworkModule {
 
     @Provides
-    fun provideErrorHandlerInterceptor(): Interceptor = object : Interceptor {
-        override fun intercept(chain: Interceptor.Chain): Response {
-            try {
-                return chain.proceed(chain.request())
-            } catch (exception: Exception) {
-                throw ClosedPrException(displayMessage = exception.message ?: "")
-            }
-        }
-    }
-
-    @Provides
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().also {
             // Add logging interceptor for only debug builds
@@ -40,12 +29,10 @@ class NetworkModule {
 
     @Provides
     fun provideOkHttpNetworkClient(
-        httpLoggingInterceptor: HttpLoggingInterceptor,
-        errorHandlerInterceptor: Interceptor
+        httpLoggingInterceptor: HttpLoggingInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(httpLoggingInterceptor)
-            .addInterceptor(errorHandlerInterceptor)
             .build()
     }
 

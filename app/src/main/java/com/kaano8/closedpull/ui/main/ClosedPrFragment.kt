@@ -7,12 +7,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import com.kaano8.closedpull.databinding.FragmentClosedPrBinding
 import com.kaano8.closedpull.extensions.gone
 import com.kaano8.closedpull.extensions.visible
-import com.kaano8.closedpull.ui.main.adapter.ClosedPrListAdapter
-import com.kaano8.closedpull.ui.main.state.UiState
+import com.kaano8.closedpull.ui.main.adapter.list.ClosedPrListAdapter
+import com.kaano8.closedpull.ui.main.adapter.loadstate.ClosedPrStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -27,7 +31,7 @@ class ClosedPrFragment : Fragment() {
     private val viewModel: ClosedPrViewModel by viewModels()
 
     @Inject
-    lateinit var adapter: ClosedPrListAdapter
+    lateinit var closedPrListAdapter: ClosedPrListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,66 +44,60 @@ class ClosedPrFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        observeForEvents()
-        viewModel.getClosedPrs()
+        startCollection()
+        observeLoadStates()
     }
 
     private fun setupRecyclerView() {
-        closedPrBinding.swipeRefreshLayout.setOnRefreshListener {
-            viewModel.getClosedPrs()
+        with(closedPrBinding) {
+            swipeRefreshLayout.setOnRefreshListener { closedPrListAdapter.refresh() }
+
+            closedPrRecyclerView.apply {
+                adapter = closedPrListAdapter
+                // Optimization param stating that size of item will remain same throughout
+                setHasFixedSize(true)
+            }
+
+            closedPrListAdapter.withLoadStateHeaderAndFooter(
+                header = ClosedPrStateAdapter(closedPrListAdapter::retry),
+                footer = ClosedPrStateAdapter(closedPrListAdapter::retry)
+            )
         }
-        closedPrBinding.closedPrRecyclerView.adapter = adapter
     }
 
-    private fun observeForEvents() {
-        viewModel.uiState.observe(viewLifecycleOwner) { uiStatus ->
-            when (uiStatus) {
-                is UiState.NoClosedPrs -> {
-                    closedPrBinding.apply {
-                        setSwipeRefreshingFalse()
-                        progressBar.gone()
-                        noClosedPrs.visible()
-                        closedPrRecyclerView.gone()
+    private fun startCollection() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.flow.collectLatest { pagingData ->
+                closedPrListAdapter.submitData(pagingData)
+            }
+        }
+    }
+
+    private fun observeLoadStates() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            closedPrListAdapter.loadStateFlow.collectLatest { loadStates ->
+                // Need to identify the initial state, otherwise it will be shown at 2 places
+                when(loadStates.source.refresh) {
+                    is LoadState.NotLoading -> {
+                       hideProgress()
                     }
-                }
-                is UiState.Loading -> {
-                    closedPrBinding.apply {
-                        if (!swipeRefreshLayout.isRefreshing)
-                            progressBar.visible()
-                        closedPrRecyclerView.gone()
-                        noClosedPrs.gone()
+                    is LoadState.Loading -> {
+                        if (!closedPrBinding.swipeRefreshLayout.isRefreshing)
+                            closedPrBinding.progressBar.visible()
                     }
-                }
-                is UiState.Success -> {
-                    adapter.submitList(uiStatus.closedPrList)
-                    closedPrBinding.apply {
-                        setSwipeRefreshingFalse()
-                        progressBar.gone()
-                        closedPrRecyclerView.visible()
-                        noClosedPrs.gone()
+                    is LoadState.Error -> {
+                        hideProgress()
+                        Toast.makeText(context, (loadStates.source.refresh as? LoadState.Error)?.error?.message ?: "", Toast.LENGTH_SHORT).show()
                     }
-                }
-                is UiState.Error -> {
-                    closedPrBinding.apply {
-                        setSwipeRefreshingFalse()
-                        progressBar.gone()
-                        closedPrRecyclerView.gone()
-                        noClosedPrs.gone()
-                    }
-                    Toast.makeText(
-                        context,
-                        uiStatus.exceptionMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             }
         }
     }
 
-    private fun setSwipeRefreshingFalse() {
-        with(closedPrBinding.swipeRefreshLayout) {
-            if (isRefreshing)
-                isRefreshing = false
-        }
+    private fun hideProgress() {
+        if (closedPrBinding.swipeRefreshLayout.isRefreshing)
+            closedPrBinding.swipeRefreshLayout.isRefreshing = false
+        else
+            closedPrBinding.progressBar.gone()
     }
 }
