@@ -7,6 +7,7 @@ import com.kaano8.closedpull.ui.main.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,9 +28,9 @@ class ClosedPrViewModel @Inject constructor(private val repository: ClosedPrRepo
                 else
                     UiState.Success(closedPrList = response.map { it.mapToUiModel() })
             } catch (exception: HttpException) {
-                _uiState.value = UiState.Error("HTTP exception: ${exception.message}")
-            } catch (exception: Exception) {
-                _uiState.value = UiState.Error("Generic exception: ${exception.message}")
+                _uiState.value = UiState.Error("HTTP exception: ${exception.localizedMessage}")
+            } catch (exception: IOException) {
+                _uiState.value = UiState.Error("Generic exception: ${exception.localizedMessage}")
             }
         }
     }
