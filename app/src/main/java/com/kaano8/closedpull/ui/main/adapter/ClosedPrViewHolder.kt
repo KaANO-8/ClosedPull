@@ -23,7 +23,8 @@ class ClosedPrViewHolder(private val itemView: View) : RecyclerView.ViewHolder(i
             .load(item.imageUrl)
             .fitCenter()
             .override(200,200)
-            .placeholder(com.bumptech.glide.R.drawable.abc_spinner_textfield_background_material)
+            // A dummy image shown until actual one is loaded.
+            .placeholder(R.drawable.ic_launcher_foreground)
             .into(userImage)
 
         userName.text = itemView.context.getString(R.string.username).format(item.username)
